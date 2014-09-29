@@ -60,6 +60,8 @@ public class Main {
         Value value = new Value("myValue".getBytes());
         Mutation mutation = new Mutation(rowID);
         mutation.put(colFam, colQual, colVis, timestamp, value);*/
+
+        conn.tableOperations().create(tableName);
         
         String iterName = "summingIter";
 		
