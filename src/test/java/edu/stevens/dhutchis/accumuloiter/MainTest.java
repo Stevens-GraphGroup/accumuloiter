@@ -5,11 +5,17 @@
  */
 package edu.stevens.dhutchis.accumuloiter;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.apache.accumulo.core.client.Connector;
+import org.apache.accumulo.core.client.Instance;
+import org.apache.accumulo.core.client.ZooKeeperInstance;
+import org.apache.accumulo.core.client.security.tokens.PasswordToken;
+import org.apache.accumulo.core.util.shell.commands.ImportDirectoryCommand;
+import org.apache.accumulo.minicluster.MiniAccumuloCluster;
+import org.junit.*;
+import org.junit.rules.TemporaryFolder;
+
+import java.io.File;
+
 import static org.junit.Assert.*;
 
 /**
@@ -17,6 +23,8 @@ import static org.junit.Assert.*;
  * @author dhutchis
  */
 public class MainTest {
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
     
     public MainTest() {
     }
@@ -43,8 +51,18 @@ public class MainTest {
     @Test
     public void testTestIter() throws Exception {
         System.out.println("testIter");
-        Main instance = new Main();
-        instance.testIter();
+        Main main = new Main();
+
+        File tempDir = tempFolder.newFolder();
+        MiniAccumuloCluster accumulo = new MiniAccumuloCluster(tempDir, "password");
+        accumulo.start(); // doesn't work on Dylan's computer for some reason.  The OS closes the Zookeeper connection.
+        Instance instance = new ZooKeeperInstance(accumulo.getInstanceName(), accumulo.getZooKeepers());
+        Connector conn = instance.getConnector("root", new PasswordToken("password"));
+
+        main.testIter(conn);
+
+        accumulo.stop();
+        tempDir.delete();
         
     }
 
