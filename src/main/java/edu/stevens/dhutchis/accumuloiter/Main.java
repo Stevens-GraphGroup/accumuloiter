@@ -103,7 +103,10 @@ public class Main {
         for(Entry<Key,Value> entry : scan) {
 //            Text row = entry.getKey().getRow();
 //            Value value = entry.getValue();
-            System.out.println(entry); // hmm, MockAccumulo does not seem to use iterators...
+            System.out.println(entry);
+            Assert.assertEquals("12", entry.getValue().toString());
+            // hmm, MockAccumulo does not seem to use iterators and prints 5,
+            // MiniAccumuloCluster correctly prints 12.
         }
         
     }
