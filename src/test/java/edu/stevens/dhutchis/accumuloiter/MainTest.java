@@ -5,6 +5,7 @@
  */
 package edu.stevens.dhutchis.accumuloiter;
 
+import org.apache.accumulo.core.client.ClientConfiguration;
 import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.Instance;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
@@ -15,6 +16,7 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+import java.util.Collection;
 
 import static org.junit.Assert.*;
 
@@ -25,6 +27,24 @@ import static org.junit.Assert.*;
 public class MainTest {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    private String username = "root";
+    private String password = "secret";
+    private static ClientConfiguration txe1config;
+    static {
+        String instance = "classdb51";
+        String host = "classdb51.cloud.llgrid.txe1.mit.edu:2181";
+        int timeout = 100000;
+        txe1config = ClientConfiguration.loadDefault().withInstance(instance).withZkHosts(host).withZkTimeout(timeout);
+    }
+
+    private void printList(Collection<?> list, String prefix) {
+        System.out.print(prefix+": ");
+        for (Object o : list) {
+            System.out.print(o+", ");
+        }
+        System.out.println();
+    }
     
     public MainTest() {
     }
@@ -45,37 +65,35 @@ public class MainTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of testIter method, of class Main.
-     */
     @Test
-    public void testTestIter() throws Exception {
-        System.out.println("testIter");
-        Main main = new Main();
+    public void testMini() throws Exception {
 
         File tempDir = tempFolder.newFolder();
         MiniAccumuloCluster accumulo = new MiniAccumuloCluster(tempDir, "password");
         accumulo.start(); // doesn't work on Dylan's computer for some reason.  The OS closes the Zookeeper connection.
+
         Instance instance = new ZooKeeperInstance(accumulo.getInstanceName(), accumulo.getZooKeepers());
         Connector conn = instance.getConnector("root", new PasswordToken("password"));
 
-        main.testIter(conn);
+        innerTest(instance, conn);
 
         accumulo.stop();
         tempDir.delete();
-        
     }
 
-    /**
-     * Test of main method, of class Main.
-     */
-//    @Test
-//    public void testMain() throws Exception {
-//        System.out.println("main");
-//        String[] args = null;
-//        Main.main(args);
-//        // TODO review the generated test code and remove the default call to fail.
-//        //fail("The test case is a prototype.");
-//    }
-    
+    @Test
+    public void testNormal() throws Exception {
+        Instance instance = new ZooKeeperInstance(txe1config.get(ClientConfiguration.ClientProperty.INSTANCE_NAME), txe1config.get(ClientConfiguration.ClientProperty.INSTANCE_ZK_HOST));
+        Connector conn = instance.getConnector(username, new PasswordToken(password));
+
+        innerTest(instance, conn);
+    }
+
+    private void innerTest(Instance instance, Connector conn) throws Exception {
+        printList(conn.tableOperations().list(), "tables");
+        printList(instance.getMasterLocations(), "master_locations");
+
+        Main main = new Main();
+        main.testIter(conn);
+    }
 }

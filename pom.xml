@@ -38,16 +38,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.17</version>
                 <configuration>
+                    <useFile>true</useFile>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <reportsDirectory>shippable/testresults</reportsDirectory>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit4</artifactId>
-                        <version>2.16</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
