@@ -32,8 +32,8 @@ public class MainTest {
     private String password = "secret";
     private static ClientConfiguration txe1config;
     static {
-        String instance = "classdb51";
-        String host = "classdb51.cloud.llgrid.txe1.mit.edu:2181";
+        String instance = "instance";
+        String host = "b412srv.ece.stevens-tech.edu:2181";
         int timeout = 100000;
         txe1config = ClientConfiguration.loadDefault().withInstance(instance).withZkHosts(host).withZkTimeout(timeout);
     }
@@ -84,7 +84,9 @@ public class MainTest {
     @Test
     public void testNormal() throws Exception {
         Instance instance = new ZooKeeperInstance(txe1config.get(ClientConfiguration.ClientProperty.INSTANCE_NAME), txe1config.get(ClientConfiguration.ClientProperty.INSTANCE_ZK_HOST));
+        System.out.println("made instance : "+instance);
         Connector conn = instance.getConnector(username, new PasswordToken(password));
+        System.out.println("made connector: "+conn);
 
         innerTest(instance, conn);
     }

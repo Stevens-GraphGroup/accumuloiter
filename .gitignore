@@ -82,4 +82,4 @@ local.properties
 .texlipse
 
 # shippable results
-shippable/testresults/
+shippable/

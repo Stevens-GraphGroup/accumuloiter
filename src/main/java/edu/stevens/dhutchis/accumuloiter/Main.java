@@ -37,7 +37,8 @@ public class Main {
         Value value = new Value("myValue".getBytes());
         Mutation mutation = new Mutation(rowID);
         mutation.put(colFam, colQual, colVis, timestamp, value);*/
-
+        if (conn.tableOperations().exists(tableName))
+            conn.tableOperations().delete(tableName);
         conn.tableOperations().create(tableName);
         
         String iterName = "summingIter";
@@ -48,7 +49,6 @@ public class Main {
         // add columns to act on
         List<IteratorSetting.Column> combineColumns = new ArrayList<>();
         combineColumns.add(new IteratorSetting.Column(columnFamily, "leg"));
-        //combineColumns.add(new IteratorSetting.Column(columnFamily, "pet"));
         Combiner.setColumns(cfg, combineColumns);
 
         // Add Iterator to table
@@ -62,15 +62,24 @@ public class Main {
         Text row1 = new Text("row1");
         Text cqleg = new Text("leg");
         Value[] vlegs = new Value[] {new Value("3".getBytes()), new Value("4".getBytes()), new Value("5".getBytes())  };
-        
-        Mutation m1 = new Mutation(row1);
-        for (Value vleg : vlegs)
-            m1.put(new Text(columnFamily), cqleg, vleg);
+
+        // AH HA!! If you batch writes to the same key together, only the last one actually transmits to Accumulo.
+        // Lesson: do each write separately.
+//        Mutation m1 = new Mutation(row1);
+//        for (Value vleg : vlegs)
+//            m1.put(new Text(columnFamily), cqleg, vleg);
         
         BatchWriterConfig config = new BatchWriterConfig();
         BatchWriter writer = conn.createBatchWriter(tableName, config);
-        writer.addMutation(m1);
-        writer.flush();
+//        writer.addMutation(m1);
+//        writer.flush();
+
+        for (Value vleg : vlegs) {
+            Mutation m1 = new Mutation(row1);
+            m1.put(new Text(columnFamily), cqleg, vleg);
+            writer.addMutation(m1);
+            writer.flush();
+        }
         
         // check results
         Scanner scan = conn.createScanner(tableName, Authorizations.EMPTY);
