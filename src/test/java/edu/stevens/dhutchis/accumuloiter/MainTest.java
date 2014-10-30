@@ -10,15 +10,12 @@ import org.apache.accumulo.core.client.Connector;
 import org.apache.accumulo.core.client.Instance;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
-import org.apache.accumulo.core.util.shell.commands.ImportDirectoryCommand;
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.util.Collection;
-
-import static org.junit.Assert.*;
 
 /**
  *
@@ -30,12 +27,12 @@ public class MainTest {
 
     private String username = "root";
     private String password = "secret";
-    private static ClientConfiguration txe1config;
+    private static ClientConfiguration myconfig;
     static {
         String instance = "instance";
         String host = "b412srv.ece.stevens-tech.edu:2181";
         int timeout = 100000;
-        txe1config = ClientConfiguration.loadDefault().withInstance(instance).withZkHosts(host).withZkTimeout(timeout);
+        myconfig = new ClientConfiguration().withInstance(instance).withZkHosts(host).withZkTimeout(timeout);
     }
 
     private void printList(Collection<?> list, String prefix) {
@@ -83,7 +80,7 @@ public class MainTest {
 
     @Test
     public void testNormal() throws Exception {
-        Instance instance = new ZooKeeperInstance(txe1config.get(ClientConfiguration.ClientProperty.INSTANCE_NAME), txe1config.get(ClientConfiguration.ClientProperty.INSTANCE_ZK_HOST));
+        Instance instance = new ZooKeeperInstance(myconfig.get(ClientConfiguration.ClientProperty.INSTANCE_NAME), myconfig.get(ClientConfiguration.ClientProperty.INSTANCE_ZK_HOST));
         System.out.println("made instance : "+instance);
         Connector conn = instance.getConnector(username, new PasswordToken(password));
         System.out.println("made connector: "+conn);
